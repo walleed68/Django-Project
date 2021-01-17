@@ -8,7 +8,7 @@ class Attendance(models.Model):
     id = models.AutoField(primary_key=True)
     lecture_topic = models.CharField(max_length=100)
     lecture_date = models.CharField(max_length=100)
-    class_name = models.CharField(max_length=100)
+    class_name = models.ForeignKey(classes,on_delete=models.CASCADE)
     course_name = models.ForeignKey(course,on_delete=models.CASCADE)
     student_name = models.ForeignKey(student,on_delete=models.CASCADE)
     attendaces = models.CharField(max_length=2)

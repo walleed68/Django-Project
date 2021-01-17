@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'finalyear.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': '',
+        'NAME': 'fyp',
         'USER': 'postgres',
         'PASSWORD': '',
         'HOST': '127.0.0.1',

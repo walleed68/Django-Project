@@ -121,10 +121,11 @@ def assignedcourses(request):
 def attendance1(request,name,name2):
     classname = name
     coursename = name2
-    courses = get_object_or_404(course, course_name=coursename)
-    attendances = Attendance.objects.filter(class_name = classname , course_name = courses.id)
-    attendances1 = Attendance.objects.filter(class_name = classname , course_name = courses.id, attendaces = "P").count()
-    attendances2 = Attendance.objects.filter(class_name=classname, course_name= courses.id, attendaces="A").count()
+    courses = get_object_or_404(course, course_name = coursename)
+    class1 = get_object_or_404(classes,class_name = classname)
+    attendances = Attendance.objects.filter(class_name = class1 , course_name = courses.id)
+    attendances1 = Attendance.objects.filter(class_name = class1 , course_name = courses.id, attendaces = "P").count()
+    attendances2 = Attendance.objects.filter(class_name=class1, course_name= courses.id, attendaces="A").count()
     attendances3 = attendances.count()
     if(attendances3 == 0):
         attendances4 = 100
@@ -145,30 +146,35 @@ def assignment(request):
     return render(request, 'tables5s.html',args)
 
 def pendingassignment(request):
-    user1 = request.user
-    student1 = get_object_or_404(student, roll_number=user1.username)
-    students = get_object_or_404(studentcourses, student_name=student1)
-    class1 = get_object_or_404(classes, class_name=students.class_name)
-    course1 = get_object_or_404(course, course_name=students.course_name)
-    assignment1 = Assignment.objects.filter(class_name=class1, course_name=course1, status="Open", submission = "Not Submitted")
+    try:
+        user1 = request.user
+        student1 = get_object_or_404(student, roll_number=user1.username)
+        students = get_object_or_404(studentcourses, student_name=student1)
+        class1 = get_object_or_404(classes, class_name=students.class_name)
+        course1 = get_object_or_404(course, course_name=students.course_name)
+        assignment1 = Assignment.objects.filter(class_name=class1, course_name=course1, status="Open", submission = "Not Submitted")
 
-    if (request.POST):
-        assignment2 = request.POST.get('selectassignment')
-        file = request.FILES.get('file')
-        if(assignment2 != None and file != None ):
-            assignment3 = get_object_or_404(Assignment, assignment_name=assignment2, class_name=class1,
+        if (request.POST):
+            assignment2 = request.POST.get('selectassignment')
+            file = request.FILES.get('file')
+            if(assignment2 != None and file != None ):
+                assignment3 = get_object_or_404(Assignment, assignment_name=assignment2, class_name=class1,
                                             course_name=course1)
-            assignment3.submission = "Submitted"
-            assignment3.save()
-            form_input = Marks( student_name = student1, assignment_name=assignment3, total_marks=assignment3.total_marks, file=file,obtained_marks = "Not Marked" , submission="Submitted", class_name=class1, course_name=course1, student_roll_number=student1.roll_number)
-            form_input.save()
-            messages.success(request, 'Assignment submitted Successfully', extra_tags=" success")
-        else:
-            messages.error(request, 'Please Select All fields Correctly ', extra_tags=" error")
+                assignment3.submission = "Submitted"
+                assignment3.save()
+                form_input = Marks( student_name = student1, assignment_name=assignment3, total_marks=assignment3.total_marks, file=file,obtained_marks = "Not Marked" , submission="Submitted", class_name=class1, course_name=course1, student_roll_number=student1.roll_number)
+                form_input.save()
+                messages.success(request, 'Assignment submitted Successfully', extra_tags=" success")
+            else:
+                messages.error(request, 'Please Select All fields Correctly', extra_tags=" error")
 
-    args = {'assignment1': assignment1}
-    return render(request, 'students.html', args)
+        args = {'assignment1': assignment1}
+        return render(request, 'students.html', args)
+    except:
+        if(request.POST):
+            messages.error(request, 'No Assignment Assigned', extra_tags=" error")
 
+        return render(request, 'students.html')
 def marks(request,id):
     marks3 = 0
     marks4 = 0
