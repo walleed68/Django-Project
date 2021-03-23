@@ -136,14 +136,18 @@ def attendance1(request,name,name2):
     return render(request, 'tables4s.html', args)
 
 def assignment(request):
-    user1=request.user
-    student1 = get_object_or_404(student, roll_number=user1.username)
-    students = get_object_or_404(studentcourses, student_name=student1)
-    class1 = get_object_or_404(classes, class_name=students.class_name)
-    course1 = get_object_or_404(course, course_name=students.course_name)
-    assignment1 = Assignment.objects.filter(class_name=class1, course_name=course1)
-    args = {'assignment1':assignment1}
-    return render(request, 'tables5s.html',args)
+    try:
+        user1 = request.user
+        student1 = get_object_or_404(student, roll_number=user1.username)
+        students = get_object_or_404(studentcourses, student_name=student1)
+        class1 = get_object_or_404(classes, class_name=students.class_name)
+        course1 = get_object_or_404(course, course_name=students.course_name)
+        assignment1 = Assignment.objects.filter(class_name=class1, course_name=course1)
+        args = {'assignment1':assignment1}
+        return render(request, 'tables5s.html',args)
+    except:
+        return render(request, 'tables5s.html')
+
 
 def pendingassignment(request):
     try:
