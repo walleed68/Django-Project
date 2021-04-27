@@ -1,1 +1,0 @@
-web: gunicorn finalyear.wsgi --log-file -

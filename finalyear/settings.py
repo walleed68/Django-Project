@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'n*d+q=e2^t*fb$22pmi*4!zvlix#6*332w17qc5gqd*=mn_#l7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','smsfyp.herokuapp.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -47,7 +47,6 @@ MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,7 +85,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'fyp',
         'USER': 'postgres',
-        'PASSWORD': 'roseoil15',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'PORT': '5432'
         }
@@ -145,6 +144,6 @@ AUTH_USER_MODEL = "Admin.customuser"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = '587'
-EMAIL_HOST_USER ='bcsfyp2k17@gmail.com'
-EMAIL_HOST_PASSWORD = 'fyp2k17a'
+EMAIL_HOST_USER =''
+EMAIL_HOST_PASSWORD = ''
 EMAIL_USE_TLS = True

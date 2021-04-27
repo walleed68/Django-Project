@@ -119,19 +119,21 @@ def assignedcourses(request):
     return render(request, 'tables3s.html',args)
 
 def attendance1(request,name,name2):
+    user1 = request.user
+    students = get_object_or_404(student, roll_number=user1.username)
     classname = name
     coursename = name2
     courses = get_object_or_404(course, course_name = coursename)
     class1 = get_object_or_404(classes,class_name = classname)
-    attendances = Attendance.objects.filter(class_name = class1 , course_name = courses.id)
-    attendances1 = Attendance.objects.filter(class_name = class1 , course_name = courses.id, attendaces = "P").count()
-    attendances2 = Attendance.objects.filter(class_name=class1, course_name= courses.id, attendaces="A").count()
+    attendances = Attendance.objects.filter(class_name = class1 , course_name = courses.id , student_name = students.id)
+    attendances1 = Attendance.objects.filter(class_name = class1 , course_name = courses.id, attendaces = "P" , student_name = students.id).count()
+    attendances2 = Attendance.objects.filter(class_name=class1, course_name= courses.id, attendaces="A" , student_name = students.id).count()
     attendances3 = attendances.count()
     if(attendances3 == 0):
         attendances4 = 100
     else:
         attendances4 = (attendances1 * 100)/attendances3
-    args = {'attendances': attendances, 'attendances1':attendances1, 'attendances2':attendances2, 'attendances3':attendances3, 'attendances4':attendances4 }
+    args = {'attendances': attendances, 'attendances1':attendances1, 'attendances2':attendances2, 'attendances3':attendances3, 'attendances4':attendances4, 'course':coursename }
 
     return render(request, 'tables4s.html', args)
 

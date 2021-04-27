@@ -17,15 +17,11 @@ from  Student import views
 from django.urls import path,include
 from django.conf.urls.static import static
 from . import settings
-from django.views.static import serve
-from django.conf.urls import url
 
 urlpatterns = [
     path('', views.login1, name='student_page'),
     path('admin/',include('Admin.urls')),
     path('teacher/',include('Teacher.urls')),
     path('student/',include('Student.urls')),
-    url(r'^media/(?P<path>.*)$', serve,{'document_root':       settings.MEDIA_URL}),
-    url(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_URL}),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 

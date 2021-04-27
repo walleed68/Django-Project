@@ -161,19 +161,27 @@ def mark_attendances(request):
         course_name = request.POST.get('coursename')
         topic = request.POST.get('topic')
         dates = date.today()
+        a=[]
+        b=[]
         for present in presents:
-            students = get_object_or_404(student,roll_number = present)
-            courses = get_object_or_404(course,course_name = course_name)
-            classes1 = get_object_or_404(classes,class_name = class_name)
-            form_input = Attendance(class_name=classes1, course_name=courses, student_name=students, attendaces = "P" , lecture_date=dates , lecture_topic =topic)
-            form_input.save()
-        for absent in absents:
-            classes1 = get_object_or_404(classes, class_name=class_name)
-            students1 = get_object_or_404(student,roll_number = absent)
-            courses1 = get_object_or_404(course, course_name=course_name)
-            form_input = Attendance(class_name=classes1, course_name=courses1, student_name=students1,lecture_date=dates , lecture_topic =topic,
+            if present not in a:
+                students = get_object_or_404(student,roll_number = present)
+                a.append(present)
+                courses = get_object_or_404(course,course_name = course_name)
+                classes1 = get_object_or_404(classes,class_name = class_name)
+                form_input1 = Attendance(class_name=classes1, course_name=courses, student_name=students, attendaces = "P" , lecture_date=dates , lecture_topic =topic)
+                form_input1.save()
+        else:
+            for absent in absents:
+                    if absent not in b:
+                        if absent not in a:
+                            classes1 = get_object_or_404(classes, class_name=class_name)
+                            b.append(absent)
+                            students1 = get_object_or_404(student,roll_number = absent)
+                            courses1 = get_object_or_404(course, course_name=course_name)
+                            form_input2 = Attendance(class_name=classes1, course_name=courses1, student_name=students1,lecture_date=dates , lecture_topic =topic,
                                         attendaces="A")
-            form_input.save()
+                            form_input2.save()
 
     return render(request,'tables4t.html' , args)
 
@@ -272,6 +280,7 @@ def delete_assignment(request,id):
     assignment1.delete()
     messages.error(request, 'Assignment deleted Successfully', extra_tags=" error")
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
 
 
 
