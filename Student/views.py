@@ -1,3 +1,6 @@
+import json
+
+import requests
 from django.contrib import messages
 from django.contrib.auth import logout, authenticate, login
 from django.core.files.storage import FileSystemStorage
@@ -30,21 +33,31 @@ def dologin(request):
     if request.method != "POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
     else:
-
-        user = authenticate(request, username=request.POST.get("email"),
-                            password=request.POST.get("password"))
-        if user != None:
-            if user.is_active:
-                if user.user_type == "3":
-                    login(request, user)
-                    return HttpResponseRedirect('student')
-                else:
-                    messages.error(request, 'please enter correct credentials', extra_tags=" error")
-                    return HttpResponseRedirect('/student/login')
-        else:
-            messages.error(request, 'please enter correct credentials', extra_tags=" error")
+        captcha_token = request.POST.get("g-recaptcha-response")
+        cap_url = "https://www.google.com/recaptcha/api/siteverify"
+        cap_secret = "6Ld-xYcdAAAAALIeY62YWPVsRX8Osekzp2JTpxCJ"
+        cap_data = {"secret": cap_secret, "response": captcha_token}
+        cap_server_response = requests.post(url=cap_url, data=cap_data)
+        cap_json = json.loads(cap_server_response.text)
+        if cap_json['success'] == False:
+            messages.error(request, 'Invalid Captcha', extra_tags=" error")
             return HttpResponseRedirect('/student/login')
-    return HttpResponseRedirect('/student/login')
+        else:
+
+            user = authenticate(request, username=request.POST.get("email"),
+                                password=request.POST.get("password"))
+            if user != None:
+                if user.is_active:
+                    if user.user_type == "3":
+                        login(request, user)
+                        return HttpResponseRedirect('student')
+                    else:
+                        messages.error(request, 'please enter correct credentials', extra_tags=" error")
+                        return HttpResponseRedirect('/student/login')
+            else:
+                messages.error(request, 'please enter correct credentials', extra_tags=" error")
+                return HttpResponseRedirect('/student/login')
+        return HttpResponseRedirect('/student/login')
 
 
 def logout_user(request):
@@ -56,16 +69,26 @@ def logout_user(request):
 def forgotpassword(request):
     try:
         if (request.POST):
-            forgot = request.POST.get("forgotpass")
-            students = student.objects.get(email=forgot)
-            # send an email
-            send_mail(
-                'Credentials of Student Portal',  # subject
-                'Here is your password : ' + students.passwd,  # message
-                '',  # from email
-                [students.email]  # to email
-            )
-            messages.success(request, 'We have mailed your password', extra_tags=" success")
+            captcha_token = request.POST.get("g-recaptcha-response")
+            cap_url = "https://www.google.com/recaptcha/api/siteverify"
+            cap_secret = "6Ld-xYcdAAAAALIeY62YWPVsRX8Osekzp2JTpxCJ"
+            cap_data = {"secret": cap_secret, "response": captcha_token}
+            cap_server_response = requests.post(url=cap_url, data=cap_data)
+            cap_json = json.loads(cap_server_response.text)
+            if cap_json['success'] == False:
+                messages.error(request, 'Invalid Captcha', extra_tags=" error")
+                return HttpResponseRedirect('/student/forgot_password')
+            else:
+                forgot = request.POST.get("forgotpass")
+                students = student.objects.get(email=forgot)
+                # send an email
+                send_mail(
+                    'Credentials of Student Portal',  # subject
+                    'Here is your password : ' + students.passwd,  # message
+                    '',  # from email
+                    [students.email]  # to email
+                )
+                messages.success(request, 'We have mailed your password', extra_tags=" success")
         return render(request, 'forgot-password.html')
     except student.DoesNotExist:
         messages.error(request, 'Email Does NoT Exist', extra_tags=" error")

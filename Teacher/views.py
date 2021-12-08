@@ -1,3 +1,6 @@
+import json
+
+import requests
 from django.contrib.auth import authenticate, logout,login
 from django.core.files.storage import FileSystemStorage
 from django.core.mail import send_mail
@@ -40,20 +43,30 @@ def dologin(request):
     if request.method != "POST":
         return HttpResponse("<h2>Method Not Allowed</h2>")
     else:
-
-        user = authenticate(request, username=request.POST.get("email"),
-                                         password=request.POST.get("password"))
-        if user != None:
-            if user.is_active:
-                if user.user_type == "2":
-                    login(request, user)
-                    return HttpResponseRedirect('teacher')
-                else:
-                    messages.error(request, 'please enter correct credentials', extra_tags=" error")
-                    return HttpResponseRedirect('/teacher/login')
-        else:
-            messages.error(request, 'please enter correct credentials', extra_tags=" error")
+        captcha_token = request.POST.get("g-recaptcha-response")
+        cap_url = "https://www.google.com/recaptcha/api/siteverify"
+        cap_secret = "6Ld-xYcdAAAAALIeY62YWPVsRX8Osekzp2JTpxCJ"
+        cap_data = {"secret": cap_secret, "response": captcha_token}
+        cap_server_response = requests.post(url=cap_url, data=cap_data)
+        cap_json = json.loads(cap_server_response.text)
+        if cap_json['success'] == False:
+            messages.error(request, 'Invalid Captcha', extra_tags=" error")
             return HttpResponseRedirect('/teacher/login')
+        else:
+
+            user = authenticate(request, username=request.POST.get("email"),
+                                         password=request.POST.get("password"))
+            if user != None:
+                if user.is_active:
+                    if user.user_type == "2":
+                        login(request, user)
+                        return HttpResponseRedirect('teacher')
+                    else:
+                        messages.error(request, 'please enter correct credentials', extra_tags=" error")
+                        return HttpResponseRedirect('/teacher/login')
+            else:
+                messages.error(request, 'please enter correct credentials', extra_tags=" error")
+                return HttpResponseRedirect('/teacher/login')
     return HttpResponseRedirect('/teacher/login')
 
 
@@ -69,16 +82,26 @@ def forgotpassword(request):
 
     try:
         if (request.POST):
-            forgot = request.POST.get("forgotpass")
-            teachers = teacher.objects.get(email=forgot)
-            # send an email
-            send_mail(
-                'Credentials of Student Portal',  # subject
-                'Here is your password : ' + teachers.passwd,  # message
-                '',  # from email
-                [teachers.email]  # to email
-            )
-        messages.success(request, 'We have mailed your password', extra_tags=" success")
+            captcha_token = request.POST.get("g-recaptcha-response")
+            cap_url = "https://www.google.com/recaptcha/api/siteverify"
+            cap_secret = "6Ld-xYcdAAAAALIeY62YWPVsRX8Osekzp2JTpxCJ"
+            cap_data = {"secret": cap_secret, "response": captcha_token}
+            cap_server_response = requests.post(url=cap_url, data=cap_data)
+            cap_json = json.loads(cap_server_response.text)
+            if cap_json['success'] == False:
+                messages.error(request, 'Invalid Captcha', extra_tags=" error")
+                return HttpResponseRedirect('/teacher/forgot_password')
+            else:
+                forgot = request.POST.get("forgotpass")
+                teachers = teacher.objects.get(email=forgot)
+                # send an email
+                send_mail(
+                    'Credentials of Student Portal',  # subject
+                    'Here is your password : ' + teachers.passwd,  # message
+                    '',  # from email
+                    [teachers.email]  # to email
+                )
+            messages.success(request, 'We have mailed your password', extra_tags=" success")
         return render(request, 'forgot-password.html')
 
     except teacher.DoesNotExist:
