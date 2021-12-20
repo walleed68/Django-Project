@@ -1,0 +1,4 @@
+IT LAW PAPER IMP LEC 30/11/2021
+
+
+python manage.py runserver_plus --cert-file cert.pem --key-file key.pem
